@@ -54,36 +54,33 @@ def is_empty(position):
 # %% Choice Section
 
 def critical_position(position):
+     # Checking any critical position for rows
      for text1 in ['top', 'mid', 'bot']:
           counter = 0
           for text2 in ['L', 'M', 'R']:
                if text1 + text2 in position:
                     counter += 1
           if counter == 2:
-               if text1 + 'L' not in position:
-                    if board[text1 + 'L'] == ' ':
-                         return text1 + 'L'
-               elif text1 + 'M' not in position:
-                    if board[text1 + 'M'] == ' ':
-                         return text1 + 'M'
-               else:
-                    if board[text1 + 'R'] == ' ':
-                         return text1 + 'R'
+               if board[text1 + 'L'] == ' ':
+                    return text1 + 'L'
+               elif board[text1 + 'M'] == ' ':
+                    return text1 + 'M'
+               elif board[text1 + 'R'] == ' ':
+                    return text1 + 'R'
+     # Checking any critical position for columns
      for text2 in ['L', 'M', 'R']:
           counter = 0
           for text1 in ['top', 'mid', 'bot']:
                if text1 + text2 in position:
                     counter += 1
           if counter == 2:
-               if 'top' + text2 not in position:
-                    if board['top' + text2] == ' ':
-                         return 'top' + text2
-               elif 'mid' + text2 not in position:
-                    if board['mid' + text2] == ' ':
-                         return 'mid' + text2
-               else:
-                    if board['bot' + text2] == ' ':
-                         return 'bot' + text2 
+               if board['top' + text2] == ' ':
+                    return 'top' + text2
+               elif board['mid' + text2] == ' ':
+                    return 'mid' + text2
+               elif board['bot' + text2] == ' ':
+                    return 'bot' + text2 
+     # Checking critical position for left diagonal
      counter = 0
      if 'topL' in position:
           counter += 1
@@ -92,15 +89,13 @@ def critical_position(position):
      if 'botR' in position:
           counter += 1
      if counter == 2:
-          if 'topL' not in position:
-               if board['topL'] == ' ':
-                    return 'topL'
-          if 'midM' not in position:
-               if board['midM'] == ' ': 
-                    return 'midM'
-          else:
-               if board['botR'] == ' ':
-                    return 'botR'
+          if board['topL'] == ' ':
+               return 'topL'
+          elif board['midM'] == ' ':
+               return 'midM'
+          elif board['botR'] == ' ':
+               return 'botR'
+     # Checking critical position for right diagonal
      counter = 0
      if 'topR' in position:
           counter += 1
@@ -109,22 +104,18 @@ def critical_position(position):
      if 'botL' in position:
           counter += 1
      if counter == 2:
-          if 'topR' not in position:
-               if board['topR'] == ' ':
-                    return 'topL'
-          if 'midM' not in position:
-               if board['midM'] == ' ':
-                    return 'midM'
-          else:
-               if board['botL'] == ' ':
-                    return 'botL'
+          if board['topR'] == ' ':
+               return 'topL'
+          elif board['midM'] == ' ':
+               return 'midM'
+          elif board['botL'] == ' ':
+               return 'botL'
      
          
 # %% Main Code
 
 print('First player will play for "X", while the second player will play for "O"')     
 player = input('Who will play first? (type "c" for computer or "u" for you): ')
-#firstPlayer = 'c'
      
 turn = 'X'
 
@@ -133,11 +124,9 @@ for i in range(9):
     
 # Computer Choice Section
     if player == 'c':
-         
         choiceNo = len(c_position) + 1
         critical_u = critical_position(u_position)
         critical_c = critical_position(c_position)
-        
         if choiceNo == 1 and i != 0 and is_empty('midM'):
             place = 'midM'
         else:
@@ -151,19 +140,37 @@ for i in range(9):
                  else:
                       place = random.choice(corner_positions)
                 
-        if place in corner_positions:
-             corner_positions.remove(place)
         c_position.append(place)
-        print('Computer has made its choice as below: ')
+        print('Computer has made its choice.')
         player = 'u'
+        
 # User Choice Section
     else:
-        print('Turn for ' + turn + '. ' + 'Which place? ')
-        place = input()
-        if place in corner_positions:
-             corner_positions.remove(place)
+        while True:
+            print('Which place do you select? ')
+            place = input()
+            if place in positions:
+                if is_empty(place):
+                    break
+                print('The position is not empty. Choose another position.')
+            else:    
+                print('The position you choose is not defined. Please type correct position.')            
+
         u_position.append(place)
         player = 'c'
+        
+# Updating corner position available for computer         
+    if place in corner_positions:
+        corner_positions.remove(place)   
+
+# Updating the board and alternate the turn        
+    board[place] = turn
+    if turn == 'X':
+        turn = 'O'
+    else:
+        turn = 'X' 
+        
+# Checking for winner        
     if i >= 4:
         if is_winner(board):
             if turn == 'X':
@@ -174,11 +181,6 @@ for i in range(9):
             print('{} wins the game!'.format(winner))
             break     
     
-    board[place] = turn
-    if turn == 'X':
-        turn = 'O'
-    else:
-        turn = 'X'
 else:
     printboard(board)
     print('The match is drawn!')
