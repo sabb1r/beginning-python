@@ -11,8 +11,10 @@ import random
 
 board = {'topL': ' ', 'topM': ' ', 'topR': ' ', 'midL': ' ', 'midM': ' ', 'midR': ' ', 'botL': ' ', 'botM': ' ', 'botR': ' '}
 
-positions = ['topL', 'topM', 'topR', 'midL', 'midM', 'midR', 'botL', 'botM', 'botR']
+positions = [['topL', 'topM', 'topR'], ['midL', 'midM', 'midR'], ['botL', 'botM', 'botR']]
 corner_positions = ['topL', 'topR', 'botL', 'botR']
+ldiag_positions = ['topL', 'midM', 'botR']
+rdiag_positions = ['topR', 'midM', 'botL']
 
 c_position = []
 u_position = []
@@ -31,91 +33,71 @@ def printboard(board):
 # %% Winner Detection 
 
 def is_winner(board):
-    for text in ['top', 'mid', 'bot']:
-        if board[text + 'L'] == board[text + 'M'] == board[text + 'R'] != ' ':
+    def decision(plc1, plc2, plc3):
+        if board[plc1] == board[plc2] == board[plc3] != ' ':
             return True
-    for text in ['L', 'M', 'R']:
-        if board['top' + text] == board['mid' + text] == board['bot' + text] != ' ':
+        else:
+            return False
+       
+    for i in range(3):
+        if decision(*positions[i]):
             return True
-    if board['topL'] == board['midM'] == board['botR'] != ' ':
+        if decision(positions[0][i], positions[1][i], positions[2][i]):
+            return True
+    if decision(*ldiag_positions):
         return True
-    elif board['topR'] == board['midM'] == board['botL'] != ' ':
+    if decision(*rdiag_positions):
         return True
-    else:
-        return False
+    return False
 # %% Check whether a position is empty or not
        
-def is_empty(position):
-    if board[position] != ' ':
+def is_empty(location):
+    if board[location] != ' ':
         return False
     else:
         return True
+
      
 # %% Choice Section
 
 def critical_position(position):
-     # Checking any critical position for rows
-     for text1 in ['top', 'mid', 'bot']:
-          counter = 0
-          for text2 in ['L', 'M', 'R']:
-               if text1 + text2 in position:
-                    counter += 1
-          if counter == 2:
-               if board[text1 + 'L'] == ' ':
-                    return text1 + 'L'
-               elif board[text1 + 'M'] == ' ':
-                    return text1 + 'M'
-               elif board[text1 + 'R'] == ' ':
-                    return text1 + 'R'
-     # Checking any critical position for columns
-     for text2 in ['L', 'M', 'R']:
-          counter = 0
-          for text1 in ['top', 'mid', 'bot']:
-               if text1 + text2 in position:
-                    counter += 1
-          if counter == 2:
-               if board['top' + text2] == ' ':
-                    return 'top' + text2
-               elif board['mid' + text2] == ' ':
-                    return 'mid' + text2
-               elif board['bot' + text2] == ' ':
-                    return 'bot' + text2 
+     def how_many(location):
+          num = 0
+          for loc in location:
+               if loc in position:
+                    num += 1
+          if num == 2:
+               unique_place = set(location) - set(position)
+               unique_place = unique_place.pop()
+               if is_empty(unique_place):
+                    return unique_place          
+     # Checking any critical position for rows & columns
+     for ind in range(3):
+          critical = how_many(positions[ind])
+          if critical:
+               return critical
+          critical = how_many([positions[0][ind], positions[1][ind], positions[2][ind]])
+          if critical:
+               return critical   
      # Checking critical position for left diagonal
-     counter = 0
-     if 'topL' in position:
-          counter += 1
-     if 'midM' in position:
-          counter += 1
-     if 'botR' in position:
-          counter += 1
-     if counter == 2:
-          if board['topL'] == ' ':
-               return 'topL'
-          elif board['midM'] == ' ':
-               return 'midM'
-          elif board['botR'] == ' ':
-               return 'botR'
+     critical = how_many(ldiag_positions)
+     if critical:
+          return critical
      # Checking critical position for right diagonal
-     counter = 0
-     if 'topR' in position:
-          counter += 1
-     if 'midM' in position:
-          counter += 1
-     if 'botL' in position:
-          counter += 1
-     if counter == 2:
-          if board['topR'] == ' ':
-               return 'topL'
-          elif board['midM'] == ' ':
-               return 'midM'
-          elif board['botL'] == ' ':
-               return 'botL'
+     critical = how_many(rdiag_positions)
+     if critical:
+          return critical
      
          
 # %% Main Code
 
 print('First player will play for "X", while the second player will play for "O"')     
-player = input('Who will play first? (type "c" for computer or "u" for you): ')
+while True:
+     player = input('Who will play first? (type "c" for computer or "u" for you): ')
+     if player == 'c' or player == 'u':
+          break
+     print('Wrong selection!')
+     player = input('Who will play first? (type "c" for computer or "u" for you): ')
      
 turn = 'X'
 
@@ -127,8 +109,18 @@ for i in range(9):
         choiceNo = len(c_position) + 1
         critical_u = critical_position(u_position)
         critical_c = critical_position(c_position)
-        if choiceNo == 1 and i != 0 and is_empty('midM'):
+        if choiceNo == 1 and i != 0 and len(corner_positions) < 4 and is_empty('midM'):
             place = 'midM'
+        elif choiceNo == i == 2 or choiceNo == i == 3 or choiceNo == i == 4:
+             if c_position[-1] in ldiag_positions:
+                  for place in set(corner_positions) - set(ldiag_positions):
+                       if is_empty(place) and critical_position(c_position + [place]):
+                            break
+                            
+             else:
+                  for place in set(corner_positions) - set(rdiag_positions):
+                       if is_empty(place) and critical_position(c_position + [place]):
+                            break
         else:
             if critical_c:
                  place = critical_c
@@ -136,7 +128,7 @@ for i in range(9):
                  if critical_u:
                       place = critical_u
                  elif not corner_positions:
-                      place = random.choice(positions - c_position - u_position)
+                      place = random.choice(set(board.keys()) - set(c_position) - set(u_position))
                  else:
                       place = random.choice(corner_positions)
                 
@@ -149,7 +141,7 @@ for i in range(9):
         while True:
             print('Which place do you select? ')
             place = input()
-            if place in positions:
+            if place in board.keys():
                 if is_empty(place):
                     break
                 print('The position is not empty. Choose another position.')
