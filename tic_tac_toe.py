@@ -30,9 +30,10 @@ def printboard(board):
     print(board['botL'], ' | ', board['botM'], ' | ', board['botR'])
     print('\n')
     
+    
 # %% Winner Detection 
 
-def is_winner(board):
+def is_winner():
     def decision(plc1, plc2, plc3):
         if board[plc1] == board[plc2] == board[plc3] != ' ':
             return True
@@ -49,6 +50,8 @@ def is_winner(board):
     if decision(*rdiag_positions):
         return True
     return False
+
+
 # %% Check whether a position is empty or not
        
 def is_empty(location):
@@ -109,7 +112,7 @@ for i in range(9):
         choiceNo = len(c_position) + 1
         critical_u = critical_position(u_position)
         critical_c = critical_position(c_position)
-        if choiceNo == 1 and i != 0 and len(corner_positions) < 4 and is_empty('midM'):
+        if choiceNo == 1 and i != 0 and is_empty('midM'):
             place = 'midM'
         elif choiceNo == i == 2 or choiceNo == i == 3 or choiceNo == i == 4:
              if c_position[-1] in ldiag_positions:
@@ -164,7 +167,7 @@ for i in range(9):
         
 # Checking for winner        
     if i >= 4:
-        if is_winner(board):
+        if is_winner():
             if turn == 'X':
                 winner = 'O'
             else:
